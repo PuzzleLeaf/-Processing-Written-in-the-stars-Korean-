@@ -1,31 +1,45 @@
+import java.util.Scanner; 
+Scanner scan = new Scanner(System.in);
+
+
 PImage starBg;
 ArrayList<Point> myArr;
 int starNum = 800;
-int starLimit = 300;
+int starLimit = 500;
+int textSize = 210;
 PFont font;
-String text[] = {"안녕","하세요","만나서","반가워요"};
-color c = #332233;
-color b = #ff0000;
-color currentColor = lerpColor(255,255, 200);
+String text[] = {"디자인 프로그래밍","★☆★☆★","배경에 별이","깜빡이고","별똥별이","떨어지네","!@#!@#","Star!"};
+int idx = 0;
+
+String myText = "Type something";
 
 Star myStar[] = new Star[starNum];
+
+
 void setup()
 {
-   starBg = loadImage("mainbg.png");
-   myArr = new ArrayList();
-   font = loadFont("휴먼가는샘체-70.vlw");
-   size(1000,500);
-   imageMode(CENTER);
-    starBg.resize(width,height);
-    
+  starBg = loadImage("bg.png");
+  myArr = new ArrayList();
+   
+  font = loadFont("휴먼가는샘체-70.vlw");
+
+  size(1900,1000);
+  imageMode(CENTER); 
+  starBg.resize(width,height);
   for(int i=0;i<starNum;i++)
     myStar[i] = new Star();
-  setText("안녕");
+    
+  setText(text[idx]);
+  
+  
 }
+
+
 
 void draw()
 {
-  image(starBg,width/2,height/2);
+  
+   image(starBg,width/2,height/2);
    for(int i=0;i<starLimit;i++)
     {
       if(i%starLimit/3==0)
@@ -39,17 +53,63 @@ void draw()
         myStar[i].display();
       }
    }
+   
    for(int i=0;i<myArr.size();i++){
      myArr.get(i).update();
      myArr.get(i).display();
    }
+   
+   
+   keyInput();
+   
+   description();
+   auto();
 }
 
-void mouseClicked()
+void description()
+{
+   textSize(15);
+   fill(200+random(-30,30),180);
+   text("Click to Screen",width-width/5,height-height/20);
+      text(myText, 0, 0, width, height);
+}
+
+void auto()
+{
+  for(int i=0;i<myArr.size();i++)
+  {
+    if(!myArr.get(i).isEnd())
+      return;
+  }
+  textChange();
+}
+
+void keyInput()
+{
+ if(scan.hasNext())
+ {
+   myText += scan.next();
+ }
+}
+
+
+
+void textChange()
 {
   myArr.clear();
-  setText(text[1]);
+  idx++;
+  
+  if(idx==text.length)
+    idx = 0;
+    
+  setText(text[idx]);
 }
+void mouseClicked()
+{
+  textChange();
+  
+}
+
 
 void setText(String txt)
 {
@@ -57,7 +117,7 @@ void setText(String txt)
   pg.beginDraw();
   pg.fill(0);
   pg.textAlign(CENTER);
-  pg.textFont(font,200);
+  pg.textFont(font,textSize);
   pg.text(txt,width/2,height/2);
   pg.endDraw();
   pg.loadPixels();  
@@ -65,128 +125,9 @@ void setText(String txt)
   for(int h=0;h<height;h+=4)
     for(int w=0;w<width;w+=4)
     {
-     if(pg.pixels[width*h+w]!=0){
-       Point temp = new Point(w,h);
-       myArr.add(temp);
-     }
+       if(pg.pixels[width*h+w]!=0){
+         Point temp = new Point(w,h);
+         myArr.add(temp);
+       }
     }
-}
-
-class Point
-{
-  PVector pos;
-  PVector des;
-  PVector vel;
-  PVector acc;
-  int speed = (int)random(10,23);
-  float size = random(1,6);
-  Point(float x, float y)
-  {
-    pos = new PVector(random(0,width),random(0,height));
-    des = new PVector(x,y);
-    vel = new PVector(0,0);
-    acc = new PVector(0,0);
-  }
-  void display()
-  {
-     fill(currentColor);
-     ellipse(pos.x,pos.y,size,size);  
-  }
-  
-  void update()
-  {
-    float distance = dist(pos.x,pos.y,des.x,des.y);
-    float check =1.0;
-    if(distance<50)
-    {
-      check =0;
-    }
-    PVector toward = new PVector(this.des.x,this.des.y);
-    toward.sub(pos);
-    toward.normalize();
-    toward.mult(speed*check);
-    
-    PVector steer = new PVector(toward.x,toward.y);
-    steer.sub(vel);
-    steer.normalize();
-    steer.mult(check);
-    acc.add(steer);
-    
-    vel.add(acc);
-    pos.add(vel);
-    acc.mult(0);
-  }
-}
-
-
-class Star
-{
-  float xpos, ypos;
-  PVector location;
-  float brightness;
-  float starSize;
-  float light;
-  float dropSpeed = random(1,4);
-  
-  
-  Star()
-  {
-    noStroke();
-    location = new PVector(random(width),random(height));
-    starSize = random(1,4);
-    light = random(1,7);
-    brightness =30;
-  }
-  
-  void display()
-  {
-    for(int i=0;i<starSize;i++)
-    {
-      fill(255,brightness-i*5);
-      ellipse(location.x,location.y,i,i);
-    }
-  }
-  
-  //빛나는 효과
-  void shine()
-  {
-    if(brightness>255){
-      brightness =255;
-      light = random(-1,-7);
-      
-    }
-    if(brightness<0)
-    {
-     location = new PVector(random(width),random(height-height/5));
-      light = random(1,7);
-      starSize = random(3);
-      brightness =0 ;
-    }
-     brightness +=light;
-     
-  }
-  
-  void drop()
-  {
-    if(location.x >width || location.y>height-height/8)
-    {
-      location.x = random(width);
-      location.y = random(height-height/8);
-      dropSpeed = random(2,6);
-    }
-    location.x+=dropSpeed;
-    location.y+=dropSpeed;
-    
-  }
-  
-  void dropDisplay()
-  {
-    fill(255);
-    for(float i=20;i>0;i-=1){
-      ellipse(location.x-i,location.y-i,starSize/i,starSize/i);
-    }
-    ellipse(location.x,location.y,starSize,starSize);
-  }
- 
-  
 }
