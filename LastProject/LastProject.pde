@@ -1,14 +1,11 @@
-import java.util.Scanner; 
-Scanner scan = new Scanner(System.in);
 
-
-PImage starBg;
 ArrayList<Point> myArr;
 int starNum = 800;
 int starLimit = 500;
-int textSize = 210;
+int textSize ;
 PFont font;
-String text[] = {"디자인 프로그래밍","★☆★☆★","배경에 별이","깜빡이고","별똥별이","떨어지네","!@#!@#","Star!"};
+float num = 0;
+String text[] = {"밤 하늘에 쓰여진 별들\nStars written in the night sky","디자인 프로그래밍","Puzzle Leaf"};
 int idx = 0;
 
 String myText = "Type something";
@@ -18,19 +15,20 @@ Star myStar[] = new Star[starNum];
 
 void setup()
 {
-  starBg = loadImage("bg.png");
   myArr = new ArrayList();
    
   font = loadFont("휴먼가는샘체-70.vlw");
 
-  size(1900,1000);
+  size(1200,800);
   imageMode(CENTER); 
-  starBg.resize(width,height);
   for(int i=0;i<starNum;i++)
     myStar[i] = new Star();
-    
+
+  noStroke();
+
+
+  textSize = width/10;
   setText(text[idx]);
-  
   
 }
 
@@ -39,13 +37,28 @@ void setup()
 void draw()
 {
   
-   image(starBg,width/2,height/2);
+  background(7,20,29);
+  drawMoon();
+  drawShadow(((width-width/4)+130)-(num),height/8);
+  
+  num++;
+  if(num>300)
+    num=0;
+    
    for(int i=0;i<starLimit;i++)
     {
-      if(i%starLimit/3==0)
+   
+      if(i%starLimit/7==0)
+      {
+        myStar[i].myStar();
+        myStar[i].myDisplay();
+        
+      }
+      else if(i%starLimit/10==0)
       {
         myStar[i].drop();
         myStar[i].dropDisplay();
+        
       }
       else
       {
@@ -59,19 +72,39 @@ void draw()
      myArr.get(i).display();
    }
    
-   
-   keyInput();
-   
+   if(mousePressed)
+   {
+     Point temp = new Point(mouseX,mouseY);
+     myArr.add(temp);
+   }
    description();
-   auto();
+  // auto();
 }
+
+void drawMoon(){
+    for(int i=1; i<50; i++) {
+      fill(245,10);
+      ellipse(width-width/4, height/8,130-i*5,130-i*5);
+      ellipse(width-width/4, height/8,90,90);
+    }
+}
+
+void drawShadow(float x, float y) {
+    for(int i=1; i<30; i++) {
+      fill(7,20,29,100);
+      ellipse(x, y,130-i*5,130-i*5);
+    }
+}
+
+
 
 void description()
 {
-   textSize(15);
+   textSize = width/20;
    fill(200+random(-30,30),180);
-   text("Click to Screen",width-width/5,height-height/20);
-      text(myText, 0, 0, width, height);
+   text("왼쪽 클릭 - 그리기\n오른쪽 클릭 - 새로운 문자",width-width/4,height-height/10);
+   textSize = width/10;
+
 }
 
 void auto()
@@ -83,15 +116,6 @@ void auto()
   }
   textChange();
 }
-
-void keyInput()
-{
- if(scan.hasNext())
- {
-   myText += scan.next();
- }
-}
-
 
 
 void textChange()
@@ -106,8 +130,8 @@ void textChange()
 }
 void mouseClicked()
 {
-  textChange();
-  
+    if(mouseButton == RIGHT)
+      textChange();
 }
 
 
@@ -122,8 +146,18 @@ void setText(String txt)
   pg.endDraw();
   pg.loadPixels();  
   
-  for(int h=0;h<height;h+=4)
-    for(int w=0;w<width;w+=4)
+  int val = 4;
+
+  if(width>1100)
+    val = 4;
+  else if(width>800)
+    val =3;
+  else
+    val =2;
+
+    
+  for(int h=0;h<height;h+=val)
+    for(int w=0;w<width;w+=val)
     {
        if(pg.pixels[width*h+w]!=0){
          Point temp = new Point(w,h);
